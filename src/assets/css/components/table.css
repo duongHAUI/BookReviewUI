@@ -210,14 +210,12 @@ td.m__e-table-col {
 .col-fixed-left {
   position: sticky;
   left: 0;
-  background-color: white;
   z-index: 1;
   width: 30px;
 }
 .col-fixed-right {
   position: sticky;
   right: 0;
-  background-color: white;
   width: 70px;
 }
 .col-right {
@@ -272,6 +270,7 @@ td.m__e-table-col {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1;
   text-align: left;
 }
 .m__e-table-col-function li {

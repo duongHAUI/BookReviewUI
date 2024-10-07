@@ -191,6 +191,51 @@ class config {
           // fixedRight: true
         }
       ])
+
+      this.columnUser = [
+        {
+          name: 'profile_picture',
+          title: 'Ảnh đại diện',
+          textAlign: 'center',
+          type: 'image',
+          width: 100
+        },
+        {
+          name: 'fullname',
+          title: 'Tên',
+          textAlign: 'left',
+          type: 'text',
+          width: 150
+        },
+        {
+          name: 'email',
+          title: 'Email',
+          textAlign: 'left',
+          type: 'text',
+          width: 150
+        },
+        {
+          name: 'phone',
+          title: 'Số điện thoại',
+          textAlign: 'left',
+          type: 'text',
+          width: 150
+        },
+        {
+          name: 'status',
+          title: 'Trạng thái',
+          textAlign: 'left',
+          type: 'statusUser',
+          width: 150
+        },
+        {
+          name: 'created_at',
+          title: 'Ngày tạo',
+          textAlign: 'center',
+          type: 'date',
+          width: 100
+        }
+      ]
   }
 }
 export default config

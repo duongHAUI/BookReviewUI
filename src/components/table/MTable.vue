@@ -22,9 +22,9 @@
           :key="index"
           >{{ column.title }}</MTableColumn
         >
-        <!-- <MTableColumn tag="th" className="col-fixed-right" v-if="isShowColumnAction"
+        <MTableColumn tag="th" className="col-fixed-right" v-if="isShowAction"
           >Chức năng</MTableColumn
-        > -->
+        >
       </tr>
       <tr
         class="m__e-table-row"
@@ -54,11 +54,22 @@
             v-model="row[column.name]"
             :isPaid="row.IsPaid"
             :orderId="row.OrderId"
+            :dataList="statusList"
+            propValue="Status"
+            propName="Title"
+            :rowData="row"
+            v-if="column.type == 'status'"
+            @selectedItem="(value, data) => $emit('selectedItem', value, data, column.type)"
+          />
+          <status-order
+            v-model="row[column.name]"
+            :isPaid="row.IsPaid"
+            :orderId="row.OrderId"
             :dataList="statusReviewList"
             propValue="Status"
             propName="Title"
             :rowData="row"
-            v-if="column.type == 'statusBook'"
+            v-else-if="column.type == 'statusBook'"
             @selectedItem="(value, data) => $emit('selectedItem', value, data, column.type)"
           />
           <status-order
@@ -85,7 +96,7 @@
             {{ formatColumn(column, row[column.name]) }}
           </div>
         </MTableColumn>
-        <!-- <MTableColumn className="col-fixed-right col-center" v-if="isShowColumnAction">
+        <MTableColumn className="col-fixed-right col-center" v-if="isShowAction">
           <div class="m__e-table-col-function-btn" ref="btnFunctionMenu">
             <span @click.prevent="actionRow(row)">{{ getActionTile }}</span>
             <div
@@ -93,8 +104,8 @@
               class="m__e-table-col-icon"
               v-click-outside="clickOutSideFunction"
               ref="btnFunction"
-              :class="id === row[`${tableName}Id`] && isShowfunction ? 'active' : ''"
-              @click="row.IsActive && showFunctionId($event, row[`${tableName}Id`])"
+              :class="id === row[`${tableName}_id`] && isShowfunction ? 'active' : ''"
+              @click="showFunctionId($event, row[`${tableName}_id`],row)"
             >
               <div
                 class="icon-drop-page-blue"
@@ -102,11 +113,11 @@
               ></div>
             </div>
           </div>
-        </MTableColumn> -->
+        </MTableColumn>
       </tr>
     </table>
     <div class="m__e-list-empty" v-if="rows.length == 0">
-      src="@/assets/img/bg_report_nodata.76e50bd8.svg" alt="Không có dữ liệu" />
+      <img src="@/assets/img/bg_report_nodata.76e50bd8.svg" alt="Không có dữ liệu" />
       <span>Không có dữ liệu</span>
     </div>
     <div
@@ -118,8 +129,8 @@
       v-show="isShowfunction"
       ref="functionContextMenu"
     >
-      <li @click="confirmDeleteRow">Xóa</li>
-      <li data-tip="Tính năng chưa phát triển">Ngừng sử dụng</li>
+      <li data-tip="Tính năng chưa phát triển" @click="StopUsing">{{statusUser == 1 ? "Ngừng sử dụng" : "Hoạt động"}}</li>
+      <li data-tip="Tính năng chưa phát triển" @click="ResetPassword">Đặt lại mật khẩu</li>
     </div>
   </div>
   <!-- Pop-up thông báo khi xóa -->
@@ -161,7 +172,8 @@ export default {
     rows: Object,
     tableName: String,
     modelValue: Array,
-    isLoadding: Boolean
+    isLoadding: Boolean,
+    isShowAction : Boolean,
   },
   created() {},
   data() {
@@ -202,7 +214,8 @@ export default {
           Status: 3,
           Title: 'Từ chối'
         }
-      ]
+      ],
+      statusUser : 1
     }
   },
   computed: {
@@ -236,7 +249,7 @@ export default {
      * Hiển thị list chức năng của 1 dòng
      
      */
-    showFunctionId(event, id) {
+    showFunctionId(event, id,row) {
       if (this.id == id) {
         this.isShowfunction = false
         this.id = null
@@ -250,6 +263,7 @@ export default {
           this.functionTop = event.clientY + 15
           this.functionLeft = event.clientX - 100
         }
+        this.statusUser = row.status;
       }
     },
     /**
@@ -365,6 +379,12 @@ export default {
         return this.getTitleStatusOrder(value)
       } else if (column.type == 'paid-type') {
         return this.getTitlePaid(value)
+      }else if(column.type == 'statusUser'){
+        if(value == 1){
+          return "Đang hoạt động";
+        }else{
+          return "Đã ngừng sử dụng";
+        }
       }
       return value
     },
@@ -388,6 +408,14 @@ export default {
       } else {
         return 'Chưa thanh toán'
       }
+    },
+    StopUsing(){
+      this.$emit('StopUsing',this.id);
+      this.isShowfunction = false;
+    },
+    ResetPassword(){
+      this.$emit('ResetPassword',this.id)
+      this.isShowfunction = false;
     }
   },
   watch: {

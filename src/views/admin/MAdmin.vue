@@ -20,10 +20,10 @@
         </li>
         <li
           class="tab-search-item"
-          :class="{ active: tabActive == 'Author' }"
-          @click="activeTab('Author')"
+          :class="{ active: tabActive == 'User' }"
+          @click="activeTab('User')"
         >
-          Tác giả
+          Tài khoản
         </li>
       </ul>
       <div class="search-type-header">
@@ -62,13 +62,16 @@
     </div>
     <div class="admin-container">
       <div class="m-f-bw">
-        <div class="flex">
-          <m-check-box
-            :checked="isApproved"
-            id="isApproved"
-            @checkbox-selected="checkBoxSelected"
-          />
-          <div style="margin-left: 8px">Danh sách đã duyệt</div>
+        <div class="flex" >
+          <div v-if="tabActive != 'User'" class="flex">
+              <m-check-box
+              :checked="isApproved"
+              id="isApproved"
+              @checkbox-selected="checkBoxSelected"
+            />
+            <div style="margin-left: 8px">Danh sách đã duyệt</div>
+          </div>
+          
         </div>
         <div
           class="content-table__refesh icon-refesh"
@@ -86,6 +89,10 @@
             :isLoadding="$state.isLoadding"
             @refresh="refresh()"
             @selectedItem="selectedItemStatus"
+            :isShowAction="tabActive == 'User'"
+            :tableName="tabActive.toLowerCase()"
+            @StopUsing="StopUsing"
+            @ResetPassword="ResetPassword"
           />
           <div class="content-navigation">
             <div class="content-navigation__total">
@@ -124,6 +131,7 @@ import config from '@/config'
 import MTable from '@/components/table/MTable.vue'
 import reviewPostApi from '@/api/reviewPostApi'
 import bookApi from '@/api/bookApi'
+import userApi from '@/api/userApi'
 import MCheckBox from '@/components/checkbox/MCheckBox.vue'
 export default {
   components: {
@@ -183,8 +191,10 @@ export default {
       await this.refresh()
       if (this.tabActive == 'Review') {
         this.columns = new config().columnReview
-      } else {
+      } else if (this.tabActive == 'Book'){
         this.columns = new config().columnBook
+      }else if (this.tabActive == 'User'){
+        this.columns = new config().columnUser
       }
     },
     /**
@@ -211,6 +221,9 @@ export default {
           res = await new reviewPostApi(this.tabActive).adminReview(this.parameter)
         } else if (this.tabActive == 'Book') {
           res = await new bookApi().adminBook(this.parameter)
+        }
+        else if (this.tabActive == 'User') {
+          res = await new userApi("User").AdminUser(this.parameter)
         }
         if (res && res.Data) {
           this.rows = res.Data
@@ -242,8 +255,35 @@ export default {
     async searchData() {
       await this.refresh()
     },
-    checkBoxSelected(value) {
+    async checkBoxSelected(value) {
       this.isApproved = value
+      await this.refresh()
+    },
+    async StopUsing(id){
+      try {
+        let res
+        this.$state.isMask()
+        res = await new userApi("User").StopUsing(id)
+        if (res) {
+          await this.refresh();
+        }
+      } catch (error) {
+        console.log(error)
+      }
+      this.$state.unMask()
+    },
+    async ResetPassword(id){
+      try {
+        let res
+        this.$state.isMask()
+        res = await new userApi("User").ResetPassword(id)
+        if (res) {
+          await this.refresh();
+        }
+      } catch (error) {
+        console.log(error)
+      }
+      this.$state.unMask()
     }
   }
 }
